@@ -33,9 +33,13 @@ namespace CpuScheduling
             }
 
             var scheduled = FirstComeFirstServed.Schedule(inputProcesses);
-            ResultGrid.ItemsSource = ConvertToProcessModels(scheduled);
+            var resultModels = ConvertToProcessModels(scheduled);
+            ResultGrid.ItemsSource = resultModels;
 
             DrawGanttChart(ConvertToProcessModels(scheduled));
+            double avgTurnaround = resultModels.Average(p => p.TurnaroundTime);
+            double avgWaiting = resultModels.Average(p => p.WaitingTime);
+            MessageBox.Show($"Average Turnaround Time: {avgTurnaround:F2}\nAverage Waiting Time: {avgWaiting:F2}");
         }
 
         private void RunSJF_Click(object sender, RoutedEventArgs e)
@@ -48,9 +52,13 @@ namespace CpuScheduling
             }
 
             var scheduled = ShortestJobFirst.Schedule(inputProcesses);
-            ResultGrid.ItemsSource = ConvertToProcessModels(scheduled);
+            var resultModels = ConvertToProcessModels(scheduled);
+            ResultGrid.ItemsSource = resultModels;
 
             DrawGanttChart(ConvertToProcessModels(scheduled));
+            double avgTurnaround = resultModels.Average(p => p.TurnaroundTime);
+            double avgWaiting = resultModels.Average(p => p.WaitingTime);
+            MessageBox.Show($"Average Turnaround Time: {avgTurnaround:F2}\nAverage Waiting Time: {avgWaiting:F2}");
         }
 
         private void DrawGanttChart(List<ProcessModel> processes)
@@ -125,7 +133,9 @@ namespace CpuScheduling
                 ArrivalTime = ep.ArrivalTime,
                 BurstTime = ep.BurstTime,
                 StartTime = ep.StartTime,
-                FinishTime = ep.FinishTime
+                FinishTime = ep.FinishTime,
+                TurnaroundTime = ep.TurnaroundTime,
+                WaitingTime = ep.WaitingTime
             }).ToList();
         }
     }
@@ -137,5 +147,7 @@ namespace CpuScheduling
         public int BurstTime { get; set; }
         public int StartTime { get; set; }
         public int FinishTime { get; set; }
+        public int TurnaroundTime { get; set; }
+        public int WaitingTime { get; set; }
     }
 }

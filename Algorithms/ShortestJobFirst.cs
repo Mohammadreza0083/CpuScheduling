@@ -31,6 +31,8 @@ public class ShortestJobFirst
 
             process.StartTime = Math.Max(currentTime, process.ArrivalTime);
             process.FinishTime = process.StartTime + process.BurstTime;
+            process.TurnaroundTime = process.FinishTime - process.ArrivalTime;
+            process.WaitingTime = process.StartTime - process.ArrivalTime;
             currentTime = process.FinishTime;
 
             result.Add(process);
