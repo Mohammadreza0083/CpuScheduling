@@ -28,15 +28,22 @@ This project is a CPU scheduling simulator designed and implemented as a univers
 
 ## 🚀 How to Run
 
+### Method 1: Using Visual Studio
 1. Open the project in Visual Studio
 2. Build the project
 3. Run the application
-4. Enter processes with the following specifications:
+
+### Method 2: Using Shortcut
+1. Double-click on the `CpuScheduling` shortcut on your desktop
+2. The application will start automatically
+
+### Using the Application
+1. Enter processes with the following specifications:
    - Process name
    - Arrival time
    - Burst time
-5. Select the desired algorithm
-6. View the results
+2. Select the desired algorithm
+3. View the results
 
 ## 📊 Outputs
 
@@ -55,7 +62,7 @@ This project is a CPU scheduling simulator designed and implemented as a univers
 
 ## 📦 Releases
 
-You can download the latest stable release from the [Releases](https://github.com/yourusername/CpuScheduling/releases) page.
+You can download the latest stable release from the [Releases](https://github.com/Mohammadreza0083/CpuScheduling/releases) page.
 
 ### Latest Release: v1.0.0
 - Initial release with FCFS and SJF algorithms
@@ -73,4 +80,9 @@ This project uses:
 
 - Operating System Concepts by Silberschatz
 - Operating Systems course materials
-- Online resources related to CPU scheduling 
+- Online resources related to CPU scheduling
+
+## 🔗 Quick Links
+- [Download Latest Release](https://github.com/Mohammadreza0083/CpuScheduling/releases/latest)
+- [View Source Code](https://github.com/Mohammadreza0083/CpuScheduling)
+- [Report Issues](https://github.com/Mohammadreza0083/CpuScheduling/issues) 
