@@ -51,7 +51,16 @@ This project is a CPU scheduling simulator designed and implemented as a univers
 - **Name:** Mohammadreza Bonyadi
 - **Course:** Operating Systems
 - **University:** Islamic Azad University
-- **Proffesore Name:** Mohammadhossein Shafiabadi
+- **Professor Name:** Mohammadhossein Shafiabadi
+
+## 📦 Releases
+
+You can download the latest stable release from the [Releases](https://github.com/yourusername/CpuScheduling/releases) page.
+
+### Latest Release: v1.0.0
+- Initial release with FCFS and SJF algorithms
+- Basic GUI implementation
+- Gantt chart visualization
 
 ## 📝 Technical Details
 
