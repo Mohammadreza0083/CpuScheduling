@@ -1,12 +1,39 @@
 ﻿<Window x:Class="CpuScheduling.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:CpuScheduling"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="CPU Scheduler" Height="650" Width="1000">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="250"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
+        <!-- Inputs -->
+        <DataGrid x:Name="ProcessGrid" AutoGenerateColumns="False" CanUserAddRows="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Process Name" Binding="{Binding Name}"/>
+                <DataGridTextColumn Header="Arrival Time" Binding="{Binding ArrivalTime}"/>
+                <DataGridTextColumn Header="Burst Time" Binding="{Binding BurstTime}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Button Content="Run FCFS" Grid.Row="1" Height="40" Width="120" HorizontalAlignment="Left" Margin="0,10,0,10" Click="RunFCFS_Click"/>
+        <Button Content="Run SJF" Grid.Row="1" Height="40" Width="120" HorizontalAlignment="Left" Margin="130,10,0,10" Click="RunSJF_Click"/>
+        <StackPanel Grid.Row="2">
+            <DataGrid x:Name="ResultGrid" AutoGenerateColumns="False" Margin="0,10,0,0">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
+                    <DataGridTextColumn Header="Arrival" Binding="{Binding ArrivalTime}"/>
+                    <DataGridTextColumn Header="Burst" Binding="{Binding BurstTime}"/>
+                    <DataGridTextColumn Header="Start" Binding="{Binding StartTime}"/>
+                    <DataGridTextColumn Header="Finish" Binding="{Binding FinishTime}"/>
+                    <DataGridTextColumn Header="Turnaround" Binding="{Binding TurnaroundTime}"/>
+                    <DataGridTextColumn Header="Waiting" Binding="{Binding WaitingTime}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <Canvas x:Name="GanttChart" Height="100" Margin="0,20,0,0" Background="LightGray"/>
+        </StackPanel>
     </Grid>
 </Window>
