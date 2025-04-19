@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -9,42 +10,50 @@ namespace CpuScheduling
 {
     public partial class MainWindow
     {
+        public ObservableCollection<ProcessModel> ProcessesModel { get; }
+
         public MainWindow()
         {
             InitializeComponent();
-            ProcessGrid.ItemsSource = new List<Process>();
+
+            // Initialize the ObservableCollection
+            ProcessesModel = new ObservableCollection<ProcessModel>();
+
+            // Bind the ObservableCollection to the DataGrid
+            ProcessGrid.ItemsSource = ProcessesModel;
         }
 
         private void RunFCFS_Click(object sender, RoutedEventArgs e)
         {
-            var inputProcesses = ProcessGrid.Items.OfType<Process>().ToList();
-            if (inputProcesses.Count == 0)
+            var inputProcesses = ConvertToEntityProcesses(ProcessesModel.ToList());
+            if (inputProcesses.Count <= 1)
             {
-                MessageBox.Show("Please enter at least two process.");
+                MessageBox.Show("Please enter at least two processes.");
                 return;
             }
 
             var scheduled = FirstComeFirstServed.Schedule(inputProcesses);
-            ResultGrid.ItemsSource = scheduled;
+            ResultGrid.ItemsSource = ConvertToProcessModels(scheduled);
 
-            DrawGanttChart(scheduled);
+            DrawGanttChart(ConvertToProcessModels(scheduled));
         }
+
         private void RunSJF_Click(object sender, RoutedEventArgs e)
         {
-            var inputProcesses = ProcessGrid.Items.OfType<Process>().ToList();
-            if (inputProcesses.Count == 0)
+            var inputProcesses = ConvertToEntityProcesses(ProcessesModel.ToList());
+            if (inputProcesses.Count <= 1)
             {
-                MessageBox.Show("Please enter at least two process.");
+                MessageBox.Show("Please enter at least two processes.");
                 return;
             }
 
             var scheduled = ShortestJobFirst.Schedule(inputProcesses);
-            ResultGrid.ItemsSource = scheduled;
+            ResultGrid.ItemsSource = ConvertToProcessModels(scheduled);
 
-            DrawGanttChart(scheduled);
+            DrawGanttChart(ConvertToProcessModels(scheduled));
         }
 
-        private void DrawGanttChart(List<Process> processes)
+        private void DrawGanttChart(List<ProcessModel> processes)
         {
             GanttChart.Children.Clear();
             double scale = 30;
@@ -97,5 +106,36 @@ namespace CpuScheduling
             Canvas.SetTop(finalTime, 55);
             GanttChart.Children.Add(finalTime);
         }
+
+        private List<Process> ConvertToEntityProcesses(List<ProcessModel> processModels)
+        {
+            return processModels.Select(pm => new Process
+            {
+                Name = pm.Name,
+                ArrivalTime = pm.ArrivalTime,
+                BurstTime = pm.BurstTime
+            }).ToList();
+        }
+
+        private List<ProcessModel> ConvertToProcessModels(List<Process> entityProcesses)
+        {
+            return entityProcesses.Select(ep => new ProcessModel
+            {
+                Name = ep.Name,
+                ArrivalTime = ep.ArrivalTime,
+                BurstTime = ep.BurstTime,
+                StartTime = ep.StartTime,
+                FinishTime = ep.FinishTime
+            }).ToList();
+        }
+    }
+
+    public class ProcessModel
+    {
+        public required string Name { get; set; }
+        public int ArrivalTime { get; set; }
+        public int BurstTime { get; set; }
+        public int StartTime { get; set; }
+        public int FinishTime { get; set; }
     }
 }
