@@ -34,7 +34,7 @@ This project is a CPU scheduling simulator designed and implemented as a univers
 3. Run the application
 
 ### Method 2: Using Shortcut
-1. Double-click on the `CpuScheduling` shortcut on your desktop
+1. Double-click on the `CpuScheduling` shortcut
 2. The application will start automatically
 
 ### Using the Application
