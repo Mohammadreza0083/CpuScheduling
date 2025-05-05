@@ -2,7 +2,7 @@
 
 namespace CpuScheduling.Algorithms;
 
-public class ShortestJobFirst
+public static class ShortestJobFirst
 {
     public static List<Process> Schedule(List<Process> processes)
     {
