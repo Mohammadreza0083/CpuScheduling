@@ -21,44 +21,66 @@ namespace CpuScheduling
 
             // Bind the ObservableCollection to the DataGrid
             ProcessGrid.ItemsSource = ProcessesModel;
+
+            // Set default algorithm
+            AlgorithmComboBox.SelectedIndex = 0;
         }
 
-        private void RunFCFS_Click(object sender, RoutedEventArgs e)
+        private void RunAlgorithm_Click(object sender, RoutedEventArgs e)
         {
             var inputProcesses = ConvertToEntityProcesses(ProcessesModel.ToList());
             if (inputProcesses.Count <= 1)
             {
-                MessageBox.Show("Please enter at least two processes.");
+                MessageBox.Show("Please enter at least two processes.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            var scheduled = FirstComeFirstServed.Schedule(inputProcesses);
-            var resultModels = ConvertToProcessModels(scheduled);
-            ResultGrid.ItemsSource = resultModels;
+            List<Process> scheduled;
+            var selectedAlgorithm = ((ComboBoxItem)AlgorithmComboBox.SelectedItem).Content.ToString();
 
-            DrawGanttChart(ConvertToProcessModels(scheduled));
-            double avgTurnaround = resultModels.Average(p => p.TurnaroundTime);
-            double avgWaiting = resultModels.Average(p => p.WaitingTime);
-            MessageBox.Show($"Average Turnaround Time: {avgTurnaround:F2}\nAverage Waiting Time: {avgWaiting:F2}");
-        }
-
-        private void RunSJF_Click(object sender, RoutedEventArgs e)
-        {
-            var inputProcesses = ConvertToEntityProcesses(ProcessesModel.ToList());
-            if (inputProcesses.Count <= 1)
+            switch (selectedAlgorithm)
             {
-                MessageBox.Show("Please enter at least two processes.");
-                return;
+                case "First Come First Served (FCFS)":
+                    scheduled = FirstComeFirstServed.Schedule(inputProcesses);
+                    break;
+                case "Shortest Job First (SJF)":
+                    scheduled = ShortestJobFirst.Schedule(inputProcesses);
+                    break;
+                case "Round Robin (RR)":
+                    // Get quantum time from user
+                    var quantumDialog = new QuantumInputDialog();
+                    if (quantumDialog.ShowDialog() == true)
+                    {
+                        scheduled = RoundRobin.Schedule(inputProcesses, quantumDialog.QuantumTime);
+                    }
+                    else
+                    {
+                        return;
+                    }
+                    break;
+                case "Shortest Remaining Time (SRT)":
+                    scheduled = ShortestTimeRemaining.Schedule(inputProcesses);
+                    break;
+                default:
+                    MessageBox.Show("Please select an algorithm.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
             }
 
-            var scheduled = ShortestJobFirst.Schedule(inputProcesses);
             var resultModels = ConvertToProcessModels(scheduled);
             ResultGrid.ItemsSource = resultModels;
 
             DrawGanttChart(ConvertToProcessModels(scheduled));
+            
+            // Show statistics in a modern dialog
             double avgTurnaround = resultModels.Average(p => p.TurnaroundTime);
             double avgWaiting = resultModels.Average(p => p.WaitingTime);
-            MessageBox.Show($"Average Turnaround Time: {avgTurnaround:F2}\nAverage Waiting Time: {avgWaiting:F2}");
+            
+            var message = $"Algorithm: {selectedAlgorithm}\n\n" +
+                         $"Average Turnaround Time: {avgTurnaround:F2}\n" +
+                         $"Average Waiting Time: {avgWaiting:F2}";
+            
+            var dialog = new MaterialMessageBox(message, "Scheduling Statistics");
+            dialog.ShowDialog();
         }
 
         private void DrawGanttChart(List<ProcessModel> processes)
@@ -67,52 +89,85 @@ namespace CpuScheduling
             double scale = 30;
             double xOffset = 10;
 
+            // Create a gradient brush for the background
+            var backgroundBrush = new LinearGradientBrush(
+                Colors.LightGray,
+                Colors.White,
+                new Point(0, 0),
+                new Point(1, 1));
+            GanttChart.Background = backgroundBrush;
+
             foreach (var proc in processes)
             {
+                // Create a modern-looking rectangle with rounded corners
                 var rect = new Rectangle
                 {
                     Width = (proc.FinishTime - proc.StartTime) * scale,
                     Height = 40,
-                    Fill = new SolidColorBrush(Color.FromRgb(
-                        (byte)new Random(proc.Name.GetHashCode()).Next(50, 255),
-                        (byte)new Random(proc.Name.GetHashCode() + 1).Next(50, 255),
-                        (byte)new Random(proc.Name.GetHashCode() + 2).Next(50, 255)
-                    ))
+                    RadiusX = 5,
+                    RadiusY = 5,
+                    Fill = new SolidColorBrush(GetProcessColor(proc.Name)),
+                    Stroke = Brushes.Black,
+                    StrokeThickness = 1
                 };
 
                 Canvas.SetLeft(rect, proc.StartTime * scale + xOffset);
                 Canvas.SetTop(rect, 10);
                 GanttChart.Children.Add(rect);
 
+                // Add process name with modern styling
                 var label = new TextBlock
                 {
                     Text = proc.Name,
                     FontWeight = FontWeights.Bold,
-                    Foreground = Brushes.Black
+                    Foreground = Brushes.White,
+                    FontSize = 12,
+                    Effect = new System.Windows.Media.Effects.DropShadowEffect
+                    {
+                        Color = Colors.Black,
+                        Direction = 320,
+                        ShadowDepth = 1,
+                        Opacity = 0.5
+                    }
                 };
 
                 Canvas.SetLeft(label, proc.StartTime * scale + xOffset + 5);
                 Canvas.SetTop(label, 15);
                 GanttChart.Children.Add(label);
 
+                // Add time markers with modern styling
                 var time = new TextBlock
                 {
                     Text = proc.StartTime.ToString(),
-                    FontSize = 10
+                    FontSize = 10,
+                    Foreground = Brushes.Gray
                 };
                 Canvas.SetLeft(time, proc.StartTime * scale + xOffset - 5);
                 Canvas.SetTop(time, 55);
                 GanttChart.Children.Add(time);
             }
 
+            // Add final time marker
             var finalTime = new TextBlock
             {
                 Text = processes.Last().FinishTime.ToString(),
-                FontSize = 10
+                FontSize = 10,
+                Foreground = Brushes.Gray
             };
             Canvas.SetLeft(finalTime, processes.Last().FinishTime * scale + xOffset - 5);
             Canvas.SetTop(finalTime, 55);
             GanttChart.Children.Add(finalTime);
+        }
+
+        private Color GetProcessColor(string processName)
+        {
+            // Generate a consistent color for each process
+            var hash = processName.GetHashCode();
+            return Color.FromRgb(
+                (byte)((hash & 0xFF0000) >> 16),
+                (byte)((hash & 0x00FF00) >> 8),
+                (byte)(hash & 0x0000FF)
+            );
         }
 
         private List<Process> ConvertToEntityProcesses(List<ProcessModel> processModels)
