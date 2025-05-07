@@ -1,3 +1,4 @@
+<!-- Custom message box with Material Design styling -->
 <Window x:Class="CpuScheduling.MaterialMessageBox"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -7,6 +8,7 @@
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize">
     
+    <!-- Main Layout -->
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -14,16 +16,19 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
+        <!-- Dialog Title -->
         <TextBlock Text="{Binding Title}"
                    Style="{StaticResource MaterialDesignHeadline6TextBlock}"
                    Margin="0,0,0,10"/>
 
+        <!-- Message Content -->
         <TextBlock Text="{Binding Message}"
                    Style="{StaticResource MaterialDesignBody1TextBlock}"
                    Grid.Row="1"
                    TextWrapping="Wrap"
                    Margin="0,0,0,20"/>
 
+        <!-- OK Button -->
         <Button Content="OK"
                 Grid.Row="2"
                 Style="{StaticResource MaterialDesignFlatButton}"

@@ -2,8 +2,18 @@
 
 namespace CpuScheduling.Algorithms;
 
+/// <summary>
+/// Implements the Round Robin (RR) CPU scheduling algorithm.
+/// Each process gets a fixed time quantum for execution before being preempted.
+/// </summary>
 public static class RoundRobin
 {
+    /// <summary>
+    /// Schedules processes using the Round Robin algorithm.
+    /// </summary>
+    /// <param name="processes">List of processes to be scheduled</param>
+    /// <param name="timeQuantum">Time quantum for each process execution</param>
+    /// <returns>List of scheduled processes with calculated timing information</returns>
     public static List<Process> Schedule(List<Process> processes, int timeQuantum)
     {
         var result = new List<Process>();
@@ -21,12 +31,14 @@ public static class RoundRobin
 
         while (readyQueue.Count > 0 || index < processList.Count)
         {
+            // Add newly arrived processes to the ready queue
             while (index < processList.Count && processList[index].ArrivalTime <= currentTime)
             {
                 readyQueue.Enqueue(processList[index]);
                 index++;
             }
 
+            // If no process is ready, advance time to next arrival
             if (readyQueue.Count == 0)
             {
                 currentTime = processList[index].ArrivalTime;
@@ -35,24 +47,30 @@ public static class RoundRobin
 
             var current = readyQueue.Dequeue();
 
+            // Set start time for first execution
             if (current.StartTime == 0 && current.RemainingTime == current.BurstTime)
                 current.StartTime = currentTime;
 
+            // Execute process for time quantum or remaining time
             int executionTime = Math.Min(timeQuantum, current.RemainingTime);
             currentTime += executionTime;
             current.RemainingTime -= executionTime;
+
+            // Add newly arrived processes during execution
             while (index < processList.Count && processList[index].ArrivalTime <= currentTime)
             {
                 readyQueue.Enqueue(processList[index]);
                 index++;
             }
 
+            // If process is not finished, add it back to ready queue
             if (current.RemainingTime > 0)
             {
                 readyQueue.Enqueue(current);
             }
             else
             {
+                // Process is finished, calculate timing information
                 current.FinishTime = currentTime;
                 current.TurnaroundTime = current.FinishTime - current.ArrivalTime;
                 current.WaitingTime = current.TurnaroundTime - current.BurstTime;

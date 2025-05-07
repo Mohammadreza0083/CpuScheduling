@@ -8,8 +8,16 @@ using CpuScheduling.Entity;
 
 namespace CpuScheduling
 {
+    /// <summary>
+    /// Main window of the CPU Scheduling Simulator application.
+    /// Handles the UI interactions and coordinates between different components.
+    /// </summary>
     public partial class MainWindow
     {
+        /// <summary>
+        /// Collection of process models that is bound to the DataGrid.
+        /// Uses ObservableCollection for automatic UI updates.
+        /// </summary>
         public ObservableCollection<ProcessModel> ProcessesModel { get; }
 
         public MainWindow()
@@ -19,19 +27,75 @@ namespace CpuScheduling
             // Initialize the ObservableCollection
             ProcessesModel = new ObservableCollection<ProcessModel>();
 
+            // Add 10 empty rows with all fields null
+            for (int i = 0; i < 10; i++)
+            {
+                ProcessesModel.Add(new ProcessModel
+                {
+                    Name = null,
+                    ArrivalTime = null,
+                    BurstTime = null
+                });
+            }
+
             // Bind the ObservableCollection to the DataGrid
             ProcessGrid.ItemsSource = ProcessesModel;
+
+            // Add event handler for cell editing
+            ProcessGrid.BeginningEdit += ProcessGrid_BeginningEdit;
 
             // Set default algorithm
             AlgorithmComboBox.SelectedIndex = 0;
         }
 
+        /// <summary>
+        /// Handles the beginning of cell editing in the ProcessGrid.
+        /// Automatically assigns default process names when editing empty name cells.
+        /// </summary>
+        private void ProcessGrid_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
+        {
+            if (e.Column.Header.ToString() == "Process Name" && e.Row.Item is ProcessModel process)
+            {
+                // If name is null, set the default name
+                if (process.Name == null)
+                {
+                    int index = ProcessesModel.IndexOf(process);
+                    process.Name = $"P{index + 1}";
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handles the addition of new items to the ProcessGrid.
+        /// Creates a new process with all fields initialized to null.
+        /// </summary>
+        private void ProcessGrid_AddingNewItem(object sender, AddingNewItemEventArgs e)
+        {
+            // Get the current count of items
+            int currentCount = ProcessesModel.Count;
+            
+            // Create a new process with all fields null
+            e.NewItem = new ProcessModel
+            {
+                Name = null,
+                ArrivalTime = null,
+                BurstTime = null
+            };
+        }
+
+        /// <summary>
+        /// Handles the algorithm execution button click.
+        /// Validates input, runs the selected algorithm, and displays results.
+        /// </summary>
         private void RunAlgorithm_Click(object sender, RoutedEventArgs e)
         {
-            var inputProcesses = ConvertToEntityProcesses(ProcessesModel.ToList());
+            // Filter out processes with null values
+            var validProcesses = ProcessesModel.Where(p => p.Name != null && p.ArrivalTime.HasValue && p.BurstTime.HasValue).ToList();
+            var inputProcesses = ConvertToEntityProcesses(validProcesses);
+            
             if (inputProcesses.Count <= 1)
             {
-                MessageBox.Show("Please enter at least two processes.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Please enter at least two processes with valid names, arrival times, and burst times.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -83,6 +147,10 @@ namespace CpuScheduling
             dialog.ShowDialog();
         }
 
+        /// <summary>
+        /// Draws the Gantt chart visualization of the scheduling results.
+        /// Creates rectangles for each process execution period with time markers.
+        /// </summary>
         private void DrawGanttChart(List<ProcessModel> processes)
         {
             GanttChart.Children.Clear();
@@ -159,6 +227,9 @@ namespace CpuScheduling
             GanttChart.Children.Add(finalTime);
         }
 
+        /// <summary>
+        /// Generates a consistent color for each process based on its name.
+        /// </summary>
         private Color GetProcessColor(string processName)
         {
             // Generate a consistent color for each process
@@ -170,16 +241,22 @@ namespace CpuScheduling
             );
         }
 
+        /// <summary>
+        /// Converts ProcessModel objects to Process entities for algorithm processing.
+        /// </summary>
         private List<Process> ConvertToEntityProcesses(List<ProcessModel> processModels)
         {
             return processModels.Select(pm => new Process
             {
                 Name = pm.Name,
-                ArrivalTime = pm.ArrivalTime,
-                BurstTime = pm.BurstTime
+                ArrivalTime = pm.ArrivalTime ?? 0,
+                BurstTime = pm.BurstTime ?? 0
             }).ToList();
         }
 
+        /// <summary>
+        /// Converts Process entities back to ProcessModel objects for display.
+        /// </summary>
         private List<ProcessModel> ConvertToProcessModels(List<Process> entityProcesses)
         {
             return entityProcesses.Select(ep => new ProcessModel
@@ -195,11 +272,15 @@ namespace CpuScheduling
         }
     }
 
+    /// <summary>
+    /// Model class representing a process in the UI.
+    /// Contains all necessary properties for process scheduling and display.
+    /// </summary>
     public class ProcessModel
     {
-        public required string Name { get; set; }
-        public int ArrivalTime { get; set; }
-        public int BurstTime { get; set; }
+        public string? Name { get; set; }
+        public int? ArrivalTime { get; set; }
+        public int? BurstTime { get; set; }
         public int StartTime { get; set; }
         public int FinishTime { get; set; }
         public int TurnaroundTime { get; set; }

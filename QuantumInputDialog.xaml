@@ -1,3 +1,4 @@
+<!-- Dialog for inputting quantum time in Round Robin algorithm -->
 <Window x:Class="CpuScheduling.QuantumInputDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -8,6 +9,7 @@
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize">
     
+    <!-- Main Layout -->
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -15,16 +17,19 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
+        <!-- Instructions Text -->
         <TextBlock Text="Enter Quantum Time for Round Robin Algorithm:"
                    Style="{StaticResource MaterialDesignBody1TextBlock}"
                    Margin="0,0,0,10"/>
 
+        <!-- Quantum Time Input -->
         <TextBox x:Name="QuantumTextBox"
                  Grid.Row="1"
                  Style="{StaticResource MaterialDesignOutlinedTextBox}"
                  materialDesign:HintAssist.Hint="Quantum Time"
                  Margin="0,0,0,20"/>
 
+        <!-- Action Buttons -->
         <StackPanel Grid.Row="2" 
                     Orientation="Horizontal" 
                     HorizontalAlignment="Right">
