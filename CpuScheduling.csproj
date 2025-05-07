@@ -6,11 +6,12 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UseWPF>true</UseWPF>
+        <ApplicationIcon>appIcon.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="MaterialDesignColors" Version="2.1.4" />
-      <PackageReference Include="MaterialDesignThemes" Version="4.9.0" />
+        <PackageReference Include="MaterialDesignColors" Version="2.1.4" />
+        <PackageReference Include="MaterialDesignThemes" Version="4.9.0" />
     </ItemGroup>
 
 </Project>
