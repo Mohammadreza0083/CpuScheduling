@@ -9,7 +9,7 @@ public class Process
     /// <summary>
     /// Unique identifier for the process
     /// </summary>
-    public required string Name { get; set; }
+    public required string? Name { get; set; }
 
     /// <summary>
     /// Time at which the process arrives in the system

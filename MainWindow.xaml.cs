@@ -52,7 +52,7 @@ namespace CpuScheduling
         /// Handles the beginning of cell editing in the ProcessGrid.
         /// Automatically assigns default process names when editing empty name cells.
         /// </summary>
-        private void ProcessGrid_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
+        private void ProcessGrid_BeginningEdit(object? sender, DataGridBeginningEditEventArgs e)
         {
             if (e.Column.Header.ToString() == "Process Name" && e.Row.Item is ProcessModel process)
             {
@@ -71,9 +71,6 @@ namespace CpuScheduling
         /// </summary>
         private void ProcessGrid_AddingNewItem(object sender, AddingNewItemEventArgs e)
         {
-            // Get the current count of items
-            int currentCount = ProcessesModel.Count;
-            
             // Create a new process with all fields null
             e.NewItem = new ProcessModel
             {
@@ -99,21 +96,23 @@ namespace CpuScheduling
                 return;
             }
 
-            List<Process> scheduled = null;
-            List<GanttSlice> ganttSlices = null;
+            List<Process>? scheduled;
+            List<GanttSlice>? ganttSlices = null;
             var selectedAlgorithm = ((ComboBoxItem)AlgorithmComboBox.SelectedItem).Content.ToString();
 
             switch (selectedAlgorithm)
             {
                 case "First Come First Served (FCFS)":
                     scheduled = FirstComeFirstServed.Schedule(inputProcesses);
-                    // FCFS: یک بازه برای هر پروسس کافی است
-                    ganttSlices = scheduled.Select(p => new GanttSlice { Name = p.Name, Start = p.StartTime, End = p.FinishTime }).ToList();
+                    if (scheduled != null)
+                        ganttSlices = scheduled.Select(p => new GanttSlice
+                            { Name = p.Name, Start = p.StartTime, End = p.FinishTime }).ToList();
                     break;
                 case "Shortest Job First (SJF)":
                     scheduled = ShortestJobFirst.Schedule(inputProcesses);
-                    // SJF: یک بازه برای هر پروسس کافی است
-                    ganttSlices = scheduled.Select(p => new GanttSlice { Name = p.Name, Start = p.StartTime, End = p.FinishTime }).ToList();
+                    if (scheduled != null)
+                        ganttSlices = scheduled.Select(p => new GanttSlice
+                            { Name = p.Name, Start = p.StartTime, End = p.FinishTime }).ToList();
                     break;
                 case "Round Robin (RR)":
                     var quantumDialog = new QuantumInputDialog();
@@ -138,20 +137,23 @@ namespace CpuScheduling
                     return;
             }
 
-            var resultModels = ConvertToProcessModels(scheduled);
-            ResultGrid.ItemsSource = resultModels;
+            if (scheduled != null)
+            {
+                var resultModels = ConvertToProcessModels(scheduled);
+                ResultGrid.ItemsSource = resultModels;
 
-            DrawGanttChart(ganttSlices);
+                if (ganttSlices != null) DrawGanttChart(ganttSlices);
+
+                double avgTurnaround = resultModels.Average(p => p.TurnaroundTime);
+                double avgWaiting = resultModels.Average(p => p.WaitingTime);
             
-            double avgTurnaround = resultModels.Average(p => p.TurnaroundTime);
-            double avgWaiting = resultModels.Average(p => p.WaitingTime);
+                var message = $"Algorithm: {selectedAlgorithm}\n\n" +
+                              $"Average Turnaround Time: {avgTurnaround:F2}\n" +
+                              $"Average Waiting Time: {avgWaiting:F2}";
             
-            var message = $"Algorithm: {selectedAlgorithm}\n\n" +
-                         $"Average Turnaround Time: {avgTurnaround:F2}\n" +
-                         $"Average Waiting Time: {avgWaiting:F2}";
-            
-            var dialog = new MaterialMessageBox(message, "Scheduling Statistics");
-            dialog.ShowDialog();
+                var dialog = new MaterialMessageBox(message, "Scheduling Statistics");
+                dialog.ShowDialog();
+            }
         }
 
         /// <summary>
@@ -175,20 +177,23 @@ namespace CpuScheduling
             foreach (var slice in slices)
             {
                 // Create a modern-looking rectangle with rounded corners
-                var rect = new Rectangle
+                if (slice.Name != null)
                 {
-                    Width = (slice.End - slice.Start) * scale,
-                    Height = 40,
-                    RadiusX = 5,
-                    RadiusY = 5,
-                    Fill = new SolidColorBrush(GetProcessColor(slice.Name)),
-                    Stroke = Brushes.Black,
-                    StrokeThickness = 1
-                };
+                    var rect = new Rectangle
+                    {
+                        Width = (slice.End - slice.Start) * scale,
+                        Height = 40,
+                        RadiusX = 5,
+                        RadiusY = 5,
+                        Fill = new SolidColorBrush(GetProcessColor(slice.Name)),
+                        Stroke = Brushes.Black,
+                        StrokeThickness = 1
+                    };
 
-                Canvas.SetLeft(rect, slice.Start * scale + xOffset);
-                Canvas.SetTop(rect, 10);
-                GanttChart.Children.Add(rect);
+                    Canvas.SetLeft(rect, slice.Start * scale + xOffset);
+                    Canvas.SetTop(rect, 10);
+                    GanttChart.Children.Add(rect);
+                }
 
                 // Add process name with modern styling
                 var label = new TextBlock
@@ -254,7 +259,7 @@ namespace CpuScheduling
         /// <summary>
         /// Converts ProcessModel objects to Process entities for algorithm processing.
         /// </summary>
-        private List<Process> ConvertToEntityProcesses(List<ProcessModel> processModels)
+        private static List<Process> ConvertToEntityProcesses(List<ProcessModel> processModels)
         {
             return processModels.Select(pm => new Process
             {
