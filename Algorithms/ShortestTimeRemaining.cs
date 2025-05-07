@@ -4,7 +4,12 @@ namespace CpuScheduling.Algorithms;
 
 public static class ShortestTimeRemaining
 {
-    public static List<Process> Schedule(List<Process> processes)
+    /// <summary>
+    /// Schedules processes using the Shortest Remaining Time (SRT) algorithm.
+    /// </summary>
+    /// <param name="processes">List of processes to be scheduled</param>
+    /// <returns>Tuple: List of scheduled processes, List of Gantt slices</returns>
+    public static (List<Process> scheduled, List<GanttSlice> gantt) Schedule(List<Process> processes)
     {
         var result = new List<Process>();
         var processList = processes
@@ -18,8 +23,11 @@ public static class ShortestTimeRemaining
             .OrderBy(p => p.ArrivalTime)
             .ToList();
 
+        var gantt = new List<GanttSlice>();
         var currentTime = 0;
         var completed = new HashSet<Process>();
+        Process? lastProcess = null;
+        int sliceStart = 0;
 
         while (completed.Count < processList.Count)
         {
@@ -36,6 +44,15 @@ public static class ShortestTimeRemaining
                 if (selected.StartTime == 0 && selected.RemainingTime == selected.BurstTime)
                     selected.StartTime = currentTime;
 
+                // Track Gantt slices
+                if (lastProcess != selected)
+                {
+                    if (lastProcess != null)
+                        gantt.Add(new GanttSlice { Name = lastProcess.Name, Start = sliceStart, End = currentTime });
+                    sliceStart = currentTime;
+                    lastProcess = selected;
+                }
+
                 selected.RemainingTime--;
                 currentTime++;
 
@@ -50,10 +67,20 @@ public static class ShortestTimeRemaining
             }
             else
             {
+                // Track idle time in Gantt chart
+                if (lastProcess != null)
+                {
+                    gantt.Add(new GanttSlice { Name = lastProcess.Name, Start = sliceStart, End = currentTime });
+                    lastProcess = null;
+                }
                 currentTime++;
+                sliceStart = currentTime;
             }
         }
+        // Add the last running process slice
+        if (lastProcess != null)
+            gantt.Add(new GanttSlice { Name = lastProcess.Name, Start = sliceStart, End = currentTime });
 
-        return result;
+        return (result, gantt);
     }
 }

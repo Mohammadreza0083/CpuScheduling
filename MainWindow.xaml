@@ -22,105 +22,110 @@
         </ResourceDictionary>
     </Window.Resources>
 
-    <!-- Main Grid Layout -->
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="300"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-
-        <!-- Application Title -->
-        <TextBlock Grid.Row="0" 
-                   Text="CPU Scheduling Simulator" 
-                   Style="{StaticResource MaterialDesignHeadline4TextBlock}"
-                   HorizontalAlignment="Center"
-                   Margin="0,0,0,20"/>
-
-        <!-- Process Input Section -->
-        <GroupBox Grid.Row="1" 
-                  Header="Process Input"
-                  Style="{StaticResource MaterialDesignGroupBox}"
-                  Margin="0,0,0,20">
-            <DataGrid x:Name="ProcessGrid" 
-                      AutoGenerateColumns="False" 
-                      CanUserAddRows="True"
-                      materialDesign:DataGridAssist.CellPadding="13 8 8 8"
-                      materialDesign:DataGridAssist.ColumnHeaderPadding="8"
-                      MinHeight="200"
-                      MaxHeight="300"
-                      CanUserDeleteRows="True"
-                      ItemsSource="{Binding Processes}"
-                      AddingNewItem="ProcessGrid_AddingNewItem">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Process Name" Binding="{Binding Name}"/>
-                    <DataGridTextColumn Header="Arrival Time" Binding="{Binding ArrivalTime}"/>
-                    <DataGridTextColumn Header="Burst Time" Binding="{Binding BurstTime}"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </GroupBox>
-
-        <!-- Algorithm Selection and Control Section -->
-        <StackPanel Grid.Row="2" 
-                    Orientation="Horizontal" 
-                    HorizontalAlignment="Center"
-                    Margin="0,0,0,20">
-            <ComboBox x:Name="AlgorithmComboBox"
-                      Width="250" MinWidth="150" Padding="5"
-                      materialDesign:HintAssist.Hint="Select Algorithm"
-                      materialDesign:TextFieldAssist.DecorationVisibility="Hidden">
-                <ComboBoxItem Content="First Come First Served (FCFS)"/>
-                <ComboBoxItem Content="Shortest Job First (SJF)"/>
-                <ComboBoxItem Content="Round Robin (RR)"/>
-                <ComboBoxItem Content="Shortest Remaining Time (SRT)"/>
-            </ComboBox>
-            
-            <Button Content="Run Algorithm"
-                    Style="{StaticResource MaterialDesignRaisedButton}"
-                    Click="RunAlgorithm_Click"/>
-        </StackPanel>
-
-        <!-- Results Section -->
-        <Grid Grid.Row="3">
+    <!-- Main ScrollViewer for vertical scrolling -->
+    <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                  HorizontalScrollBarVisibility="Disabled"
+                  Padding="0,0,17,0">
+        <!-- Main Grid Layout -->
+        <Grid Margin="20">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="300"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Scheduling Results Table -->
-            <GroupBox Grid.Row="0"
-                      Header="Scheduling Results"
+            <!-- Application Title -->
+            <TextBlock Grid.Row="0" 
+                       Text="CPU Scheduling Simulator" 
+                       Style="{StaticResource MaterialDesignHeadline4TextBlock}"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,20"/>
+
+            <!-- Process Input Section -->
+            <GroupBox Grid.Row="1" 
+                      Header="Process Input"
                       Style="{StaticResource MaterialDesignGroupBox}"
                       Margin="0,0,0,20">
-                <DataGrid x:Name="ResultGrid" 
-                          AutoGenerateColumns="False"
+                <DataGrid x:Name="ProcessGrid" 
+                          AutoGenerateColumns="False" 
+                          CanUserAddRows="True"
                           materialDesign:DataGridAssist.CellPadding="13 8 8 8"
-                          materialDesign:DataGridAssist.ColumnHeaderPadding="8">
+                          materialDesign:DataGridAssist.ColumnHeaderPadding="8"
+                          MinHeight="200"
+                          MaxHeight="300"
+                          CanUserDeleteRows="True"
+                          ItemsSource="{Binding Processes}"
+                          AddingNewItem="ProcessGrid_AddingNewItem">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
-                        <DataGridTextColumn Header="Arrival" Binding="{Binding ArrivalTime}"/>
-                        <DataGridTextColumn Header="Burst" Binding="{Binding BurstTime}"/>
-                        <DataGridTextColumn Header="Start" Binding="{Binding StartTime}"/>
-                        <DataGridTextColumn Header="Finish" Binding="{Binding FinishTime}"/>
-                        <DataGridTextColumn Header="Turnaround" Binding="{Binding TurnaroundTime}"/>
-                        <DataGridTextColumn Header="Waiting" Binding="{Binding WaitingTime}"/>
+                        <DataGridTextColumn Header="Process Name" Binding="{Binding Name}"/>
+                        <DataGridTextColumn Header="Arrival Time" Binding="{Binding ArrivalTime}"/>
+                        <DataGridTextColumn Header="Burst Time" Binding="{Binding BurstTime}"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </GroupBox>
 
-            <!-- Gantt Chart Visualization -->
-            <GroupBox Grid.Row="1"
-                      Header="Gantt Chart"
-                      Style="{StaticResource MaterialDesignGroupBox}">
-                <ScrollViewer HorizontalScrollBarVisibility="Auto" 
-                            VerticalScrollBarVisibility="Disabled">
-                    <Canvas x:Name="GanttChart" 
-                            Height="120" 
-                            MinWidth="800"
-                            Background="{DynamicResource MaterialDesignPaper}"/>
-                </ScrollViewer>
-            </GroupBox>
+            <!-- Algorithm Selection and Control Section -->
+            <StackPanel Grid.Row="2" 
+                        Orientation="Horizontal" 
+                        HorizontalAlignment="Center"
+                        Margin="0,0,0,20">
+                <ComboBox x:Name="AlgorithmComboBox"
+                          Width="250" MinWidth="150" Padding="5"
+                          materialDesign:HintAssist.Hint="Select Algorithm"
+                          materialDesign:TextFieldAssist.DecorationVisibility="Hidden">
+                    <ComboBoxItem Content="First Come First Served (FCFS)"/>
+                    <ComboBoxItem Content="Shortest Job First (SJF)"/>
+                    <ComboBoxItem Content="Round Robin (RR)"/>
+                    <ComboBoxItem Content="Shortest Remaining Time (SRT)"/>
+                </ComboBox>
+                
+                <Button Content="Run Algorithm"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Click="RunAlgorithm_Click"/>
+            </StackPanel>
+
+            <!-- Results Section -->
+            <Grid Grid.Row="3">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Scheduling Results Table -->
+                <GroupBox Grid.Row="0"
+                          Header="Scheduling Results"
+                          Style="{StaticResource MaterialDesignGroupBox}"
+                          Margin="0,0,0,20">
+                    <DataGrid x:Name="ResultGrid" 
+                              AutoGenerateColumns="False"
+                              materialDesign:DataGridAssist.CellPadding="13 8 8 8"
+                              materialDesign:DataGridAssist.ColumnHeaderPadding="8">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
+                            <DataGridTextColumn Header="Arrival" Binding="{Binding ArrivalTime}"/>
+                            <DataGridTextColumn Header="Burst" Binding="{Binding BurstTime}"/>
+                            <DataGridTextColumn Header="Start" Binding="{Binding StartTime}"/>
+                            <DataGridTextColumn Header="Finish" Binding="{Binding FinishTime}"/>
+                            <DataGridTextColumn Header="Turnaround" Binding="{Binding TurnaroundTime}"/>
+                            <DataGridTextColumn Header="Waiting" Binding="{Binding WaitingTime}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </GroupBox>
+
+                <!-- Gantt Chart Visualization -->
+                <GroupBox Grid.Row="1"
+                          Header="Gantt Chart"
+                          Style="{StaticResource MaterialDesignGroupBox}">
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" 
+                                VerticalScrollBarVisibility="Disabled">
+                        <Canvas x:Name="GanttChart" 
+                                Height="120" 
+                                MinWidth="800"
+                                Background="{DynamicResource MaterialDesignPaper}"/>
+                    </ScrollViewer>
+                </GroupBox>
+            </Grid>
         </Grid>
-    </Grid>
+    </ScrollViewer>
 </Window>

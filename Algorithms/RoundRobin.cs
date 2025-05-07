@@ -13,8 +13,8 @@ public static class RoundRobin
     /// </summary>
     /// <param name="processes">List of processes to be scheduled</param>
     /// <param name="timeQuantum">Time quantum for each process execution</param>
-    /// <returns>List of scheduled processes with calculated timing information</returns>
-    public static List<Process> Schedule(List<Process> processes, int timeQuantum)
+    /// <returns>Tuple: List of scheduled processes, List of Gantt slices</returns>
+    public static (List<Process> scheduled, List<GanttSlice> gantt) Schedule(List<Process> processes, int timeQuantum)
     {
         var result = new List<Process>();
         var readyQueue = new Queue<Process>();
@@ -26,6 +26,7 @@ public static class RoundRobin
             RemainingTime = p.BurstTime
         }).OrderBy(p => p.ArrivalTime).ToList();
 
+        var gantt = new List<GanttSlice>();
         var currentTime = 0;
         var index = 0;
 
@@ -53,8 +54,13 @@ public static class RoundRobin
 
             // Execute process for time quantum or remaining time
             int executionTime = Math.Min(timeQuantum, current.RemainingTime);
+            int sliceStart = currentTime;
             currentTime += executionTime;
             current.RemainingTime -= executionTime;
+            int sliceEnd = currentTime;
+
+            // Add Gantt slice
+            gantt.Add(new GanttSlice { Name = current.Name, Start = sliceStart, End = sliceEnd });
 
             // Add newly arrived processes during execution
             while (index < processList.Count && processList[index].ArrivalTime <= currentTime)
@@ -78,6 +84,6 @@ public static class RoundRobin
             }
         }
 
-        return result;
+        return (result, gantt);
     }
 }

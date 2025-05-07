@@ -99,23 +99,29 @@ namespace CpuScheduling
                 return;
             }
 
-            List<Process> scheduled;
+            List<Process> scheduled = null;
+            List<GanttSlice> ganttSlices = null;
             var selectedAlgorithm = ((ComboBoxItem)AlgorithmComboBox.SelectedItem).Content.ToString();
 
             switch (selectedAlgorithm)
             {
                 case "First Come First Served (FCFS)":
                     scheduled = FirstComeFirstServed.Schedule(inputProcesses);
+                    // FCFS: یک بازه برای هر پروسس کافی است
+                    ganttSlices = scheduled.Select(p => new GanttSlice { Name = p.Name, Start = p.StartTime, End = p.FinishTime }).ToList();
                     break;
                 case "Shortest Job First (SJF)":
                     scheduled = ShortestJobFirst.Schedule(inputProcesses);
+                    // SJF: یک بازه برای هر پروسس کافی است
+                    ganttSlices = scheduled.Select(p => new GanttSlice { Name = p.Name, Start = p.StartTime, End = p.FinishTime }).ToList();
                     break;
                 case "Round Robin (RR)":
-                    // Get quantum time from user
                     var quantumDialog = new QuantumInputDialog();
                     if (quantumDialog.ShowDialog() == true)
                     {
-                        scheduled = RoundRobin.Schedule(inputProcesses, quantumDialog.QuantumTime);
+                        var rrResult = RoundRobin.Schedule(inputProcesses, quantumDialog.QuantumTime);
+                        scheduled = rrResult.scheduled;
+                        ganttSlices = rrResult.gantt;
                     }
                     else
                     {
@@ -123,7 +129,9 @@ namespace CpuScheduling
                     }
                     break;
                 case "Shortest Remaining Time (SRT)":
-                    scheduled = ShortestTimeRemaining.Schedule(inputProcesses);
+                    var srtResult = ShortestTimeRemaining.Schedule(inputProcesses);
+                    scheduled = srtResult.scheduled;
+                    ganttSlices = srtResult.gantt;
                     break;
                 default:
                     MessageBox.Show("Please select an algorithm.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -133,9 +141,8 @@ namespace CpuScheduling
             var resultModels = ConvertToProcessModels(scheduled);
             ResultGrid.ItemsSource = resultModels;
 
-            DrawGanttChart(ConvertToProcessModels(scheduled));
+            DrawGanttChart(ganttSlices);
             
-            // Show statistics in a modern dialog
             double avgTurnaround = resultModels.Average(p => p.TurnaroundTime);
             double avgWaiting = resultModels.Average(p => p.WaitingTime);
             
@@ -151,7 +158,7 @@ namespace CpuScheduling
         /// Draws the Gantt chart visualization of the scheduling results.
         /// Creates rectangles for each process execution period with time markers.
         /// </summary>
-        private void DrawGanttChart(List<ProcessModel> processes)
+        private void DrawGanttChart(List<GanttSlice> slices)
         {
             GanttChart.Children.Clear();
             double scale = 30;
@@ -165,28 +172,28 @@ namespace CpuScheduling
                 new Point(1, 1));
             GanttChart.Background = backgroundBrush;
 
-            foreach (var proc in processes)
+            foreach (var slice in slices)
             {
                 // Create a modern-looking rectangle with rounded corners
                 var rect = new Rectangle
                 {
-                    Width = (proc.FinishTime - proc.StartTime) * scale,
+                    Width = (slice.End - slice.Start) * scale,
                     Height = 40,
                     RadiusX = 5,
                     RadiusY = 5,
-                    Fill = new SolidColorBrush(GetProcessColor(proc.Name)),
+                    Fill = new SolidColorBrush(GetProcessColor(slice.Name)),
                     Stroke = Brushes.Black,
                     StrokeThickness = 1
                 };
 
-                Canvas.SetLeft(rect, proc.StartTime * scale + xOffset);
+                Canvas.SetLeft(rect, slice.Start * scale + xOffset);
                 Canvas.SetTop(rect, 10);
                 GanttChart.Children.Add(rect);
 
                 // Add process name with modern styling
                 var label = new TextBlock
                 {
-                    Text = proc.Name,
+                    Text = slice.Name,
                     FontWeight = FontWeights.Bold,
                     Foreground = Brushes.White,
                     FontSize = 12,
@@ -199,32 +206,35 @@ namespace CpuScheduling
                     }
                 };
 
-                Canvas.SetLeft(label, proc.StartTime * scale + xOffset + 5);
+                Canvas.SetLeft(label, slice.Start * scale + xOffset + 5);
                 Canvas.SetTop(label, 15);
                 GanttChart.Children.Add(label);
 
                 // Add time markers with modern styling
                 var time = new TextBlock
                 {
-                    Text = proc.StartTime.ToString(),
+                    Text = slice.Start.ToString(),
                     FontSize = 10,
                     Foreground = Brushes.Gray
                 };
-                Canvas.SetLeft(time, proc.StartTime * scale + xOffset - 5);
+                Canvas.SetLeft(time, slice.Start * scale + xOffset - 5);
                 Canvas.SetTop(time, 55);
                 GanttChart.Children.Add(time);
             }
 
-            // Add final time marker
-            var finalTime = new TextBlock
+            // Add final time marker if there is at least one slice
+            if (slices.Count > 0)
             {
-                Text = processes.Last().FinishTime.ToString(),
-                FontSize = 10,
-                Foreground = Brushes.Gray
-            };
-            Canvas.SetLeft(finalTime, processes.Last().FinishTime * scale + xOffset - 5);
-            Canvas.SetTop(finalTime, 55);
-            GanttChart.Children.Add(finalTime);
+                var finalTime = new TextBlock
+                {
+                    Text = slices.Last().End.ToString(),
+                    FontSize = 10,
+                    Foreground = Brushes.Gray
+                };
+                Canvas.SetLeft(finalTime, slices.Last().End * scale + xOffset - 5);
+                Canvas.SetTop(finalTime, 55);
+                GanttChart.Children.Add(finalTime);
+            }
         }
 
         /// <summary>
