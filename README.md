@@ -65,7 +65,7 @@ This project is a CPU scheduling simulator designed and implemented as a univers
 - Average turnaround and waiting times
 - **Gantt chart for visual scheduling representation (shows all execution intervals, not just one per process)**
 
-## 🆕 Technical Improvements (2024 Update)
+## 🆕 Technical Improvements (2025 Update)
 
 - **GanttSlice model**: Enables accurate Gantt chart for preemptive algorithms
 - **Improved Gantt chart rendering**: All execution intervals are shown for RR and SRT
